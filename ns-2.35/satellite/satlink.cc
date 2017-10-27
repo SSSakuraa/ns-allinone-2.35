@@ -100,7 +100,16 @@ int SatLinkHead::command(int argc, const char*const* argv)
 			} else if (strcmp(argv[2], "crossseam") == 0) {
 				type_ = LINK_ISL_CROSSSEAM;
 				return TCL_OK;
-			} else {
+			}
+			/**
+			*	author: papa
+			*	add interlayer link type
+			*/
+			else if (strcmp(argv[2], "interlayer") == 0) {
+				type_ = LINK_ISL_INtERLAYER;
+				return TCL_OK;
+			}
+			else {
 				printf("Unknown link type: %s\n", argv[2]);
 				exit(1);
 			} 

@@ -160,3 +160,9 @@ int SatGeometry::are_satellites_mutually_visible(coordinate first, coordinate se
 	}
 }
 
+
+// author: papa
+// TODO
+bool SatGeometry::check_manager(coordinate leo_coord,coordinate meo_coord,int var){
+	return true;
+}

@@ -133,6 +133,14 @@ Simulator instproc create-satnode {} {
 	if {$satNodeType_ == "Geo"} {set satNodeType_ "geo"}
 	if {$satNodeType_ == "Terminal"} {set satNodeType_ "terminal"}
 	if {$satNodeType_ == "Geo-repeater"} {set satNodeType_ "geo-repeater"}
+
+	# ----------------
+	# author: papa
+	# add leo and meo type
+	# ----------------
+	if {$satNodeType_ == "Leo"} {set satNodeType_ "leosat"}
+	if {$satNodeType_ == "Meo"} {set satNodeType_ "meosat"}
+
 	if {[lsearch {polar geo terminal geo-repeater} $satNodeType_] < 0} {
 		puts "Error: undefined satNodeType: $satNodeType_; exiting"
 		exit 1
@@ -140,7 +148,13 @@ Simulator instproc create-satnode {} {
 	# Create the satnode
 	set tmp [$self newsatnode]
 	# Add uplink and downlink if this is not a terminal
-	if {$satNodeType_ == "polar" || $satNodeType_ == "geo"} {
+
+
+	# ----------------
+	# author: papa
+	# modify:if not geo-repeater
+	# ----------------
+	if {$satNodeType_ == "polar" || $satNodeType_ == "geo"||$satNodeType_ == "meosat"||$satNodeType_ == "leosat"} {
 		set linkargs "$llType_ $ifqType_ $ifqlen_ $macType_ \
 		    $downlinkBW_ $phyType_"
 		$self add-first-links $tmp gsl $linkargs $channelType_
@@ -208,7 +222,42 @@ Node/SatNode instproc set-position args {
 		$self set hm_ [new HandoffManager/Term]
 		$self cmd set_handoff_mgr [$self set hm_]
 		[$self set hm_] setnode $self
-	} else {
+	} 
+	
+	# ----------------
+	# author: papa
+	# add set_position for leo and meo
+	# ----------------
+	elseif {$nodetype_ == "leosat"} {
+		if {[llength $args] != 6 } {
+			puts "Error:  satNodeType_ is leosat, but number\
+			      of position arguments incorrect: $args; exiting"
+			exit 1
+		}
+		# set the position of leo node
+		$self set pos_ [new Position/Sat/Leo $args]
+		$self cmd set_position [$self set pos_]
+		[$self set pos_] setnode $self
+		# create handoff for leo
+		$self set hm_ [new HandoffManager/LeoSat]
+		$self cmd set_handoff_mgr [$self set hm_]		
+		[$self set hm_] setnode $self
+	} elseif {$nodetype_ == "meosat"} {
+		if {[llength $args] != 6 } {
+			puts "Error:  satNodeType_ is meosat, but number\
+			      of position arguments incorrect: $args; exiting"
+			exit 1
+		}
+		# set the position of meo node
+		$self set pos_ [new Position/Sat/Meo $args]
+		$self cmd set_position [$self set pos_]
+		[$self set pos_] setnode $self
+		# create handoff for meo
+		$self set hm_ [new HandoffManager/MeoSat]
+		$self cmd set_handoff_mgr [$self set hm_]		
+		[$self set hm_] setnode $self
+	}
+	else {
 		puts "Error:  satNodeType_ not set appropriately:\
 		     $satNodeType_ exiting"
 		exit 1

@@ -57,6 +57,7 @@
 #define LINK_ISL_INTRAPLANE 6
 #define LINK_ISL_INTERPLANE 7
 #define LINK_ISL_CROSSSEAM 8 
+#define LINK_ISL_INTERLAYER 9
 
 class SatLinkHead;
 class SatTrace;

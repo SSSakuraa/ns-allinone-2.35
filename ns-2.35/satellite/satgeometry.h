@@ -50,6 +50,12 @@
 #define EARTH_PERIOD 86164 // seconds
 #define EARTH_RADIUS 6378  // km
 #define GEO_ALTITUDE 35786 // km
+/**
+* author: papa
+* add altitude define
+*/
+#define MEO_ALTITUDE 2000 // 2000-35786
+#define LEO_ALTITUDE 1500 // <2000
 #define ATMOS_MARGIN 150 // km
 
 #define DEG_TO_RAD(x) ((x) * PI/180)
@@ -81,6 +87,10 @@ public:
 	static double get_altitude(coordinate);
 	static double check_elevation(coordinate, coordinate, double);
 	static int are_satellites_mutually_visible(coordinate, coordinate);
+
+	static bool check_manager(coordinate leo_coord,coordinate meo_coord,int var){
+		return true;
+	}
 
 protected: 
 	// Define "command" appropriately if you want OTcl access to this class

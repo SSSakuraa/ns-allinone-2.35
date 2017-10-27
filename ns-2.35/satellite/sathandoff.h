@@ -101,6 +101,29 @@ protected:
 	static int sat_handoff_int_;
 };
 
+
+class MeoSatLinkHandoffMgr : public LinkHandoffMgr {
+public:
+	MeoSatLinkHandoffMgr();
+	int handoff();
+protected:
+	SatHandoffTimer timer_;
+	static double latitude_threshold_;
+	static double longitude_threshold_;
+	static int sat_handoff_int_;
+};
+
+class LeoSatLinkHandoffMgr : public LinkHandoffMgr {
+public:
+	LeoSatLinkHandoffMgr();
+	int handoff();
+protected:
+	SatHandoffTimer timer_;
+	static double latitude_threshold_;
+	static double longitude_threshold_;
+	static int sat_handoff_int_;
+};
+
 class TermLinkHandoffMgr : public LinkHandoffMgr {
 public:
 	TermLinkHandoffMgr();

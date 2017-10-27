@@ -53,58 +53,86 @@
 #define POSITION_SAT_POLAR 2
 #define POSITION_SAT_GEO 3
 #define POSITION_SAT_TERM 4
+// author: papa
+#define POSITION＿SAT_MEO 5
+#define POSITION_SAT_LEO 6
 
-class SatPosition : public TclObject {
- public:
+class SatPosition : public TclObject
+{
+  public:
 	SatPosition();
 	int type() { return type_; }
 	double period() { return period_; }
-	Node* node() { return node_; }
-	virtual coordinate coord() = 0; 
+	Node *node() { return node_; }
+	virtual coordinate coord() = 0;
 
 	// configuration parameters
 	static double time_advance_;
- protected:
-        int command(int argc, const char*const* argv);
+
+  protected:
+	int command(int argc, const char *const *argv);
 	coordinate initial_;
 	double period_;
 	int type_;
-	Node* node_;
+	Node *node_;
 };
 
-class PolarSatPosition : public SatPosition {
- public:
-	PolarSatPosition(double = 1000, double = 90, double = 0, double = 0, 
-            double = 0);
+class PolarSatPosition : public SatPosition
+{
+  public:
+	PolarSatPosition(double = 1000, double = 90, double = 0, double = 0,
+					 double = 0);
 	virtual coordinate coord();
-	void set(double Altitude, double Lon, double Alpha, double inclination=90); 
+	void set(double Altitude, double Lon, double Alpha, double inclination = 90);
 	bool isascending();
-	PolarSatPosition* next() { return next_; }
+	PolarSatPosition *next() { return next_; }
 	int plane() { return plane_; }
 
- protected:
-        int command(int argc, const char*const* argv);
-        PolarSatPosition* next_;    // Next intraplane satellite
-	int plane_;  // Orbital plane that this satellite resides in
-	double inclination_; // radians
-
-	
+  protected:
+	int command(int argc, const char *const *argv);
+	PolarSatPosition *next_; // Next intraplane satellite
+	int plane_;				 // Orbital plane that this satellite resides in
+	double inclination_;	 // radians
 };
 
-class GeoSatPosition : public SatPosition {
- public:
+class GeoSatPosition : public SatPosition
+{
+  public:
 	GeoSatPosition(double longitude = 0);
 	virtual coordinate coord();
-	void set(double longitude); 
- protected:
+	void set(double longitude);
+
+  protected:
 };
 
-class TermSatPosition : public SatPosition {
- public:
+class MeoSatPosition : public SatPosition
+{
+  public:
+	MeoSatPosition(double longitude = 0);
+	virtual coordinate coord();
+	void set(double altitude, double longitude, double alpha, double inclination);
+
+  protected:
+};
+
+class LeoSatPosition : public SatPosition
+{
+  public:
+	LeoSatPosition(double longitude = 0);
+	virtual coordinate coord();
+	void set(double altitude, double longitude, double alpha, double inclination);
+
+  protected:
+};
+
+class TermSatPosition : public SatPosition
+{
+  public:
 	TermSatPosition(double = 0, double = 0);
 	virtual coordinate coord();
 	void set(double latitude, double longitude);
- protected:
+
+  protected:
 };
 
 #endif // __satposition_h__
