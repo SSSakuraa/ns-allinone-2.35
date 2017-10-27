@@ -111,12 +111,12 @@ class MeoSatPosition : public SatPosition
 		MeoSatPosition(double longitude = 0);
 		virtual coordinate coord();
 		void set(double altitude, double longitude, double alpha, double inclination);
-		PolarSatPosition *next() { return next_; }
+		MeoSatPosition *next() { return next_; }
 		int plane() { return plane_; }
 	protected:
 
 		int command(int argc, const char *const *argv);
-		PolarSatPosition *next_; // Next intraplane satellite
+		MeoSatPosition *next_; // Next intraplane satellite
 		int plane_;				 // Orbital plane that this satellite resides in
 		double inclination_;	 // radians
 };
@@ -127,11 +127,11 @@ class LeoSatPosition : public SatPosition
 		LeoSatPosition(double longitude = 0);
 		virtual coordinate coord();
 		void set(double altitude, double longitude, double alpha, double inclination);
-		PolarSatPosition *next() { return next_; }
+		LeoSatPosition *next() { return next_; }
 		int plane() { return plane_; }
 	protected:
 		int command(int argc, const char *const *argv);
-		PolarSatPosition *next_; // Next intraplane satellite
+		LeoSatPosition *next_; // Next intraplane satellite
 		int plane_;				 // Orbital plane that this satellite resides in
 		double inclination_;	 // radians
 };

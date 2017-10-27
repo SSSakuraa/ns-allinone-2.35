@@ -779,9 +779,9 @@ int LeoSatLinkHandoffMgr::handoff()
 		// Handoff is needed if the satellite at the other end of
 		// the link is further away than the ``next'' satellite
 		// in the peer's orbital plane.
-		pos_ = (SatPosition*)slhp->node()->position(); 
+		pos_ = (LeoSatPosition*)slhp->node()->position(); 
 		peer_slhp = get_peer_linkhead(slhp);
-		peer_pos_ = (SatPosition*) peer_->position();
+		peer_pos_ = (LeoSatPosition*) peer_->position();
 		peer_coord_ = peer_pos_->coord();
 		if (fabs(sat_latitude_) > lat_threshold_)
 			link_down_flag_ = TRUE;
