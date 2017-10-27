@@ -108,21 +108,32 @@ class GeoSatPosition : public SatPosition
 class MeoSatPosition : public SatPosition
 {
   public:
-	MeoSatPosition(double longitude = 0);
-	virtual coordinate coord();
-	void set(double altitude, double longitude, double alpha, double inclination);
+		MeoSatPosition(double longitude = 0);
+		virtual coordinate coord();
+		void set(double altitude, double longitude, double alpha, double inclination);
+		PolarSatPosition *next() { return next_; }
+		int plane() { return plane_; }
+	protected:
 
-  protected:
+		int command(int argc, const char *const *argv);
+		PolarSatPosition *next_; // Next intraplane satellite
+		int plane_;				 // Orbital plane that this satellite resides in
+		double inclination_;	 // radians
 };
 
 class LeoSatPosition : public SatPosition
 {
   public:
-	LeoSatPosition(double longitude = 0);
-	virtual coordinate coord();
-	void set(double altitude, double longitude, double alpha, double inclination);
-
-  protected:
+		LeoSatPosition(double longitude = 0);
+		virtual coordinate coord();
+		void set(double altitude, double longitude, double alpha, double inclination);
+		PolarSatPosition *next() { return next_; }
+		int plane() { return plane_; }
+	protected:
+		int command(int argc, const char *const *argv);
+		PolarSatPosition *next_; // Next intraplane satellite
+		int plane_;				 // Orbital plane that this satellite resides in
+		double inclination_;	 // radians
 };
 
 class TermSatPosition : public SatPosition
