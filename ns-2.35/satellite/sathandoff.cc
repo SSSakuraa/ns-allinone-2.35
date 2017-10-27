@@ -923,18 +923,18 @@ int LeoSatLinkHandoffMgr::handoff()
 			if(!SatNode::IsASatNode(nodep->address()))
 				continue;
 			meopeer_=(SatNode*)nodep;
-			if(meopeer_->position() && (meopeer_->position()->type()!=POSiTION_SAT_MEO))
+			if(meopeer_->position() && (meopeer_->position()->type()!=POSITION_SAT_MEO))
 				continue;
-			meosat_coord=meopeer_->position->coord();
+			meosat_coord=meopeer_->position()->coord();
 
 			// if MEO is the manager of LEO, then handoff for LINK_ISL_INTERLAYER
 			if(!SatGeometry::check_manager(peer_coord_,meosat_coord,10))
 				continue;
-			if(slhp->linkup!=TRUE){
+			if(slhp->linkup_!=TRUE){
 				slhp->linkup_=TRUE;
 				link_changes_flag_=TRUE;
 
-				slhp->phy_tx()->setchnl(meopeer->uplink());
+				slhp->phy_tx()->setchnl(meopeer_->uplink());
 				slhp->phy_rx()->setchnl(meopeer_->downlink());
 				slhp->phy_rx()->insertchnl(&(meopeer_->downlink()->ifhead_));
 			}
