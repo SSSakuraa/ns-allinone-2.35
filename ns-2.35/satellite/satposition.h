@@ -54,7 +54,7 @@
 #define POSITION_SAT_GEO 3
 #define POSITION_SAT_TERM 4
 // author: papa
-#define POSITION＿SAT_MEO 5
+#define POSITION_SAT_MEO 5
 #define POSITION_SAT_LEO 6
 
 class SatPosition : public TclObject

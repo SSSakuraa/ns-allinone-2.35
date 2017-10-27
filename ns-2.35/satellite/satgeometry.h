@@ -89,9 +89,7 @@ public:
 	static double check_elevation(coordinate, coordinate, double);
 	static int are_satellites_mutually_visible(coordinate, coordinate);
 
-	static bool check_manager(coordinate leo_coord,coordinate meo_coord,int var){
-		return true;
-	}
+	static bool check_manager(coordinate leo_coord,coordinate meo_coord,int var);
 
 protected: 
 	// Define "command" appropriately if you want OTcl access to this class
