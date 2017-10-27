@@ -70,7 +70,8 @@ struct coordinate {
         // Convert to cartesian as follows:
         // x = rsin(theta)cos(phi)
         // y = rsin(theta)sin(phi)
-        // z = rcos(theta)
+		// z = rcos(theta)
+		
 };
 
 // Library of routines involving satellite geometry
