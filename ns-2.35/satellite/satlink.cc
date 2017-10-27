@@ -106,7 +106,7 @@ int SatLinkHead::command(int argc, const char*const* argv)
 			*	add interlayer link type
 			*/
 			else if (strcmp(argv[2], "interlayer") == 0) {
-				type_ = LINK_ISL_INtERLAYER;
+				type_ = LINK_ISL_INTERLAYER;
 				return TCL_OK;
 			}
 			else {
