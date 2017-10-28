@@ -417,13 +417,10 @@ void GeoSatPosition::set(double longitude)
 // class MeoSatPosition
 /////////////////////////////////////////////////////////////////////
 
-MeoSatPosition::MeoSatPosition(double longitude)
+MeoSatPosition::MeoSatPosition(double altitude, double longitude, double alpha, double inclination)
 {
-	initial_.r = EARTH_RADIUS + MEO_ALTITUDE;
-	initial_.theta = PI / 2;
-	set(longitude);
+	set(double altitude, double longitude, double alpha, double inclination);
 	type_ = POSITION_SAT_MEO;
-	period_ = EARTH_PERIOD;
 }
 
 coordinate MeoSatPosition::coord()
@@ -437,9 +434,7 @@ coordinate MeoSatPosition::coord()
 	return current;
 }
 
-//
-// P232
-//
+
 void MeoSatPosition::set(double altitude, double longitude, double alpha, double inclination)
 {
 	if (altitude < 0)
@@ -481,13 +476,10 @@ void MeoSatPosition::set(double altitude, double longitude, double alpha, double
 // class LeoSatPosition
 /////////////////////////////////////////////////////////////////////
 
-LeoSatPosition::LeoSatPosition(double longitude)
+LeoSatPosition::LeoSatPosition(double altitude, double longitude, double alpha, double inclination)
 {
-	initial_.r = EARTH_RADIUS + LEO_ALTITUDE;
-	initial_.theta = PI / 2;
-	set(longitude);
+	set(double altitude, double longitude, double alpha, double inclination);
 	type_ = POSITION_SAT_LEO;
-	period_ = EARTH_PERIOD;
 }
 
 coordinate LeoSatPosition::coord()

@@ -108,7 +108,7 @@ class GeoSatPosition : public SatPosition
 class MeoSatPosition : public SatPosition
 {
   public:
-		MeoSatPosition(double longitude = 0);
+		MeoSatPosition(double altitude, double longitude, double alpha, double inclination);
 		virtual coordinate coord();
 		void set(double altitude, double longitude, double alpha, double inclination);
 		MeoSatPosition *next() { return next_; }
@@ -124,7 +124,7 @@ class MeoSatPosition : public SatPosition
 class LeoSatPosition : public SatPosition
 {
   public:
-		LeoSatPosition(double longitude = 0);
+		LeoSatPosition(double altitude, double longitude, double alpha, double inclination);
 		virtual coordinate coord();
 		void set(double altitude, double longitude, double alpha, double inclination);
 		LeoSatPosition *next() { return next_; }
