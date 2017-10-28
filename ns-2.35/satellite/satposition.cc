@@ -106,9 +106,15 @@ static class MeoSatPositionClass : public TclClass
 	TclObject *create(int argc, const char *const *argv)
 	{
 		if (argc == 5)
-			return (new MeoSatPosition(double(atof(argv[4]))));
+		{
+			float a = 0, b = 0, c = 0, d = 0, e = 0;
+			sscanf(argv[4], "%f %f %f %f %f", &a, &b, &c, &d, &e);
+			return (new MeoSatPosition(a, b, c, d, e));
+		}
 		else
+		{
 			return (new MeoSatPosition);
+		}
 	}
 } class_meosatposition;
 
@@ -119,9 +125,15 @@ static class LeoSatPositionClass : public TclClass
 	TclObject *create(int argc, const char *const *argv)
 	{
 		if (argc == 5)
-			return (new LeoSatPosition(double(atof(argv[4]))));
+		{
+			float a = 0, b = 0, c = 0, d = 0, e = 0;
+			sscanf(argv[4], "%f %f %f %f %f", &a, &b, &c, &d, &e);
+			return (new LeoSatPosition(a, b, c, d, e));
+		}
 		else
+		{
 			return (new LeoSatPosition);
+		}
 	}
 } class_leosatposition;
 
@@ -412,28 +424,81 @@ void GeoSatPosition::set(double longitude)
 * author: papa
 * add function for MeoSatPosition and LeoSatPosition
 */
-
 /////////////////////////////////////////////////////////////////////
 // class MeoSatPosition
 /////////////////////////////////////////////////////////////////////
 
-MeoSatPosition::MeoSatPosition(double altitude, double longitude, double alpha, double inclination)
+MeoSatPosition::MeoSatPosition(double altitude, double inclination, double longitude, double alpha, double Plane) : next_(0), plane_(0)
 {
-	set(double altitude, double longitude, double alpha, double inclination);
+	set(altitude, longitude, alpha, inclination);
+	bind("plane_", &plane_);
+	if (Plane)
+		plane_ = int(Plane);
 	type_ = POSITION_SAT_MEO;
 }
 
+//
+// The initial coordinate has the following properties:
+// theta: 0 < theta < 2 * PI (essentially, this specifies initial position)
+// phi:  0 < phi < 2 * PI (longitude of ascending node)
+// Return a coordinate with the following properties (i.e. convert to a true
+// spherical coordinate):
+// theta:  0 < theta < PI
+// phi:  0 < phi < 2 * PI
+//
 coordinate MeoSatPosition::coord()
 {
 	coordinate current;
+	double partial; // fraction of orbit period completed
+	partial =
+		(fmod(NOW + time_advance_, period_) / period_) * 2 * PI; //rad
+	double theta_cur, phi_cur, theta_new, phi_new;
+
+	// Compute current orbit-centric coordinates:
+	// theta_cur adds effects of time (orbital rotation) to initial_.theta
+	theta_cur = fmod(initial_.theta + partial, 2 * PI);
+	phi_cur = initial_.phi;
+	// Reminder:  theta_cur and phi_cur are temporal translations of
+	// initial parameters and are NOT true spherical coordinates.
+	//
+	// Now generate actual spherical coordinates,
+	// with 0 < theta_new < PI and 0 < phi_new < 360
+
+	assert(inclination_ < PI);
+
+	// asin returns value between -PI/2 and PI/2, so
+	// theta_new guaranteed to be between 0 and PI
+	theta_new = PI / 2 - asin(sin(inclination_) * sin(theta_cur));
+	// if theta_new is between PI/2 and 3*PI/2, must correct
+	// for return value of atan()
+	if (theta_cur > PI / 2 && theta_cur < 3 * PI / 2)
+		phi_new = atan(cos(inclination_) * tan(theta_cur)) +
+				  phi_cur + PI;
+	else
+		phi_new = atan(cos(inclination_) * tan(theta_cur)) +
+				  phi_cur;
+	phi_new = fmod(phi_new + 2 * PI, 2 * PI);
+
 	current.r = initial_.r;
-	current.theta = initial_.theta;
-	double fractional =
-		(fmod(NOW + time_advance_, period_) / period_) * 2 * PI; // rad
-	current.phi = fmod(initial_.phi + fractional, 2 * PI);
+	current.theta = theta_new;
+	current.phi = phi_new;
 	return current;
 }
 
+
+bool MeoSatPosition::isascending()
+{
+	double partial = (fmod(NOW + time_advance_, period_) / period_) * 2 * PI; //rad
+	double theta_cur = fmod(initial_.theta + partial, 2 * PI);
+	if ((theta_cur > PI / 2) && (theta_cur < 3 * PI / 2))
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
 
 void MeoSatPosition::set(double altitude, double longitude, double alpha, double inclination)
 {
@@ -472,27 +537,95 @@ void MeoSatPosition::set(double altitude, double longitude, double alpha, double
 	period_ = 2 * PI * sqrt(num / MU);
 }
 
+
+
+int MeoSatPosition::command(int argc, const char *const *argv)
+{
+	Tcl &tcl = Tcl::instance();
+	if (argc == 2)
+	{
+	}
+	if (argc == 3)
+	{
+		if (strcmp(argv[1], "set_next") == 0)
+		{
+			next_ = (MeoSatPosition *)TclObject::lookup(argv[2]);
+			if (next_ == 0)
+			{
+				tcl.resultf("no such object %s", argv[2]);
+				return (TCL_ERROR);
+			}
+			return (TCL_OK);
+		}
+	}
+	return (SatPosition::command(argc, argv));
+}
+
+
 /////////////////////////////////////////////////////////////////////
 // class LeoSatPosition
 /////////////////////////////////////////////////////////////////////
 
-LeoSatPosition::LeoSatPosition(double altitude, double longitude, double alpha, double inclination)
+LeoSatPosition::LeoSatPosition(double altitude, double inclination, double longitude, double alpha, double Plane) : next_(0), plane_(0)
 {
-	set(double altitude, double longitude, double alpha, double inclination);
+	set(altitude, longitude, alpha, inclination);
+	bind("plane_", &plane_);
+	if (Plane)
+		plane_ = int(Plane);
 	type_ = POSITION_SAT_LEO;
 }
-
 coordinate LeoSatPosition::coord()
 {
 	coordinate current;
+	double partial; // fraction of orbit period completed
+	partial =
+		(fmod(NOW + time_advance_, period_) / period_) * 2 * PI; //rad
+	double theta_cur, phi_cur, theta_new, phi_new;
+
+	// Compute current orbit-centric coordinates:
+	// theta_cur adds effects of time (orbital rotation) to initial_.theta
+	theta_cur = fmod(initial_.theta + partial, 2 * PI);
+	phi_cur = initial_.phi;
+	// Reminder:  theta_cur and phi_cur are temporal translations of
+	// initial parameters and are NOT true spherical coordinates.
+	//
+	// Now generate actual spherical coordinates,
+	// with 0 < theta_new < PI and 0 < phi_new < 360
+
+	assert(inclination_ < PI);
+
+	// asin returns value between -PI/2 and PI/2, so
+	// theta_new guaranteed to be between 0 and PI
+	theta_new = PI / 2 - asin(sin(inclination_) * sin(theta_cur));
+	// if theta_new is between PI/2 and 3*PI/2, must correct
+	// for return value of atan()
+	if (theta_cur > PI / 2 && theta_cur < 3 * PI / 2)
+		phi_new = atan(cos(inclination_) * tan(theta_cur)) +
+				  phi_cur + PI;
+	else
+		phi_new = atan(cos(inclination_) * tan(theta_cur)) +
+				  phi_cur;
+	phi_new = fmod(phi_new + 2 * PI, 2 * PI);
+
 	current.r = initial_.r;
-	current.theta = initial_.theta;
-	double fractional =
-		(fmod(NOW + time_advance_, period_) / period_) * 2 * PI; // rad
-	current.phi = fmod(initial_.phi + fractional, 2 * PI);
+	current.theta = theta_new;
+	current.phi = phi_new;
 	return current;
 }
 
+bool LeoSatPosition::isascending()
+{
+	double partial = (fmod(NOW + time_advance_, period_) / period_) * 2 * PI; //rad
+	double theta_cur = fmod(initial_.theta + partial, 2 * PI);
+	if ((theta_cur > PI / 2) && (theta_cur < 3 * PI / 2))
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
 //
 // Longitude is in the range (0, 180) with negative values -> west
 //
@@ -531,4 +664,28 @@ void LeoSatPosition::set(double altitude, double longitude, double alpha, double
 	inclination_ = DEG_TO_RAD(inclination);
 	double num = initial_.r * initial_.r * initial_.r;
 	period_ = 2 * PI * sqrt(num / MU);
+}
+
+
+
+int LeoSatPosition::command(int argc, const char *const *argv)
+{
+	Tcl &tcl = Tcl::instance();
+	if (argc == 2)
+	{
+	}
+	if (argc == 3)
+	{
+		if (strcmp(argv[1], "set_next") == 0)
+		{
+			next_ = (LeoSatPosition *)TclObject::lookup(argv[2]);
+			if (next_ == 0)
+			{
+				tcl.resultf("no such object %s", argv[2]);
+				return (TCL_ERROR);
+			}
+			return (TCL_OK);
+		}
+	}
+	return (SatPosition::command(argc, argv));
 }
