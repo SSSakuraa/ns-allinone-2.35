@@ -222,13 +222,7 @@ Node/SatNode instproc set-position args {
 		$self set hm_ [new HandoffManager/Term]
 		$self cmd set_handoff_mgr [$self set hm_]
 		[$self set hm_] setnode $self
-	} 
-	
-	# ----------------
-	# author: papa
-	# add set_position for leo and meo
-	# ----------------
-	elseif {$nodetype_ == "leosat"} {
+	} elseif {$nodetype_ == "leosat"} {
 		if {[llength $args] != 6 } {
 			puts "Error:  satNodeType_ is leosat, but number\
 			      of position arguments incorrect: $args; exiting"
