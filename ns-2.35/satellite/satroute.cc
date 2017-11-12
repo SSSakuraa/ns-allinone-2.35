@@ -597,7 +597,7 @@ void SatRouteObject::collect_delay(SatNode *leo){
 		adj_entry *meo_adj,*meo_next_adj;
 
 		for(nodep=Node::nodehead_.lh_first;nodep;nodep=nodep->nextnode()){
-			if(SatNode::IsASatNode（nodep->address())
+			if(SatNode::IsASatNode(nodep->address())
 				continue;
 			for(slhp=(SatLinkHead*)nodep->linklisthead().lh_first;slhp;slhp=(SatLinkHead*)slhp->nextlinkhead()){
 				//change delay inter

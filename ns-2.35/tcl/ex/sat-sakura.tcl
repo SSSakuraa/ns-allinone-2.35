@@ -125,8 +125,10 @@ $ns node-config -satNodeType meosat \
 		-downlinkBW $opt(bw_down) \
 		-wiredRouting $opt(wiredRouting) 
 
-set alt $opt(alt)
-set inc $opt(inc)
+set alt_leo $opt(alt_leo)
+set inc_leo $opt(inc_leo)
+set alt_meo $opt(alt_meo)
+set inc_meo $opt(inc_meo)
 
 source sat-iridium-nodes.tcl
 
