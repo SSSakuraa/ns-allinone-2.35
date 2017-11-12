@@ -523,3 +523,130 @@ void SatRouteObject::node_compute_routes(int node)
         delete[] hopcnt;
         delete[] parent;
 }
+
+
+
+void SatRouteObject::collect_delay(SatNode *leo){
+	SatLinkHead *slhp;
+	int src,dst;
+	Phy *phytxp,*phyrxp;
+	Channel *channelp;
+	double delay;
+	SatNode *sat;
+	LeoSatNode * leo_sat;
+	
+	int n=size_;
+	reset_all();
+	for(slhp=(SatLinkHead*)leo->linklisthead().lh_first;slhp;slhp=(SatLinkHead*)slhp->nextlinkhead){
+		if(slhp->type()=LINK_GSL_REPEATER){
+			continue;
+		}
+		if(!slhp->linkup_){
+			continue;
+		}
+		phytxp=(Phy*)slhp->phy_tx();
+		sat=(SatNode*)phytxp->node();
+		leo_sat=(LeoSatNode*)sat;
+		assert(phytxp);
+		channelp=phytxp->channel();
+		if(channelp){
+			continue;
+		}
+		phyrxp=channelp->ifhead_.lh_first;
+		for(;phyrxp;phyrxp=phyrxp->nextchnl){
+			if(phyrxp==phytxp){
+				printf("configuration error: a transmit interface i a channel target\n");
+				exit(1);
+			}
+		}
+		src=phytxp->node()->address()+1;
+		dst=phyrxp->node()->address()+1;
+		if(metric_delay_){
+			delay=((SatChannel*)channelp)->get_pdelay(phytxp->node(),phyrxp->node());
+		}else{
+			delay=1;
+		}
+		leo_sat->insert_link(size_,dst,delay,slhp);
+	}
+
+
+
+	void SatRouteObject::transmit_delay(adj_entry*leo_adj,adj_entry*meo_adj){
+		int n=size_;
+		#define LEO_ADJ(i,j) leo_adj[INDEX(i,j,size_)].cost
+		#define LEO_ADJ_ENTRY(i,j) leo_adj[INDEX(i,j,size_)].entry
+		#define MEO_ADJ(i,j) meo_adj[INDEX(i,j,size_)].cost
+		#define MEO_ADJ_ENTRY(i,j) meo_adj[INDEX(i,j,size_)].entry
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				if(LEO_ADJ(i,j)>0 && MEO_ADJ(i,j)<0){
+					MEO_ADJ(i,j)=LEO_ADJ(i,j);
+					MEO_ADJ_ENTRY(i,j)=LEO_ADJ_ENTRY(i,j);
+				}
+			}
+		}
+	}
+
+
+	void SatRouteObject::delay_exchange(){
+		Node *nodep;
+		SatLinkHead *slhp;
+		Phy *phytxp,*phyrxp;
+		Channel *channelp;
+		SatNode *sat,*sat_next;
+		adj_entry *meo_adj,*meo_next_adj;
+
+		for(nodep=Node::nodehead_.lh_first;nodep;nodep=nodep->nextnode()){
+			if(SatNode::IsASatNode（nodep->address())
+				continue;
+			for(slhp=(SatLinkHead*)nodep->linklisthead().lh_first;slhp;slhp=(SatLinkHead*)slhp->nextlinkhead()){
+				//change delay inter
+				if(slhp->type()==LINK_ISL_INTRAPLANE){
+					phytxp=(Phy*)slhp->phy_tx();
+					sat=(SatNode*)phytxp->node();
+					if(sat->position()->type()!=POSITION_SAT_MEO)
+						continue;
+					meo=(MeoSatNode *)sat;
+					meo_adj=meo->meo_adj;
+					channelp=phytxp->channel();
+					if(!channelp)
+						continue;
+					phyrxp=channelp->ifhead_.lh_first;
+					for(;phyrxp;phyrxp=phyrxp->nextchnl()){
+						sat_next=(SatNode*)phyrxp->node();
+						meo_next=(MeoSatNode*)sat_next;
+						if(sat_next->position()->type!=POSITION_SAT_MEO)
+							continue;
+						meo_next=(MeoSatNode*)sat_next;
+						meo_next_adj=meo_next->meo_adj;
+						meo_change_delay(meo_adj,meo_next_adj);
+					}
+				}
+				else if(slhp->type()==LINK_ISL_INTERPLANE){
+					phytxp=(Phy*)slhp->phy_tx();
+					sat=(SatNode*)phytxp->node();
+					if(sat->position()->type()!=POSITION_SAT_MEO && sat->position()->nearNorthPole(5))
+						continue;
+					meo=(MeoSatNode*)sat;
+					meo_adj=meo->meo_adj;
+					channelp=phytxp->channel();
+					if(!channelp){
+						continue;
+					}
+					phyrxp=channelp->ifhead_.lh_first;
+					for(;phyrxp;phyrxp=phyrxp->nextchnl()){
+						sat_next=(SatNode*)phyrxp->node();
+						meo_next=(MeoSatNode*)sat_next;
+						if(sat_next->position()->type()!=POSITION_SAT_MEO)
+							continue;
+						meo_next=(MeoSatNode*)sat_next;
+						meo_next_adj=meo_next->meo_adj;
+						meo_change_delay(meo_adj,meo_next_adj);
+					}
+
+				}
+			}
+		}
+
+	}
+}

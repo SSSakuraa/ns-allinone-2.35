@@ -106,6 +106,13 @@ public:
 //void hier_insert_link(int *src, int *dst, int cost);  // support hier-rtg?
 
 protected:
+  /**
+   * author: papa 
+   */
+  void collect_delay(SatNode *leo);
+  void transmit_delay(adj_entry*leo_adj,adj_entry*meo_adj);
+  void delay_exchange();
+
   void compute_topology();
   void populate_routing_tables(int node = -1);
   int lookup(int src, int dst);
